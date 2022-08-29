@@ -1,0 +1,3 @@
+[submodule "thirdparty/odrparser"]
+	path = thirdparty/odrparser
+	url = https://github.com/JensKlimke/odrparser.git
