@@ -15,5 +15,5 @@ compare with location of existing tinyxml2 (if any):<br>
 ![dpkg L](dpkg_L_tinyxml2.png)<br>
 The tinyxml2 is having known issues with some C functions (sscanf and atof) running on **Del Precision** notebooks. For this reason the tinyxml2.cpp from the root will replace the one in the odrparser/lib/tinyxml2 folder and will be used to build the static library.
 <br>
-4.The example folder has one demo of the XodrBuilder client application. Change the folder (*cd example*) and run the example: *./glut_example*:<br>
+5. The example folder has one demo of the XodrBuilder client application. Change the folder (*cd example*) and run the example: *./glut_example*:<br>
 ![dpkg L](glut_example.png)
