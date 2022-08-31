@@ -198,6 +198,7 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes) : m_XodrRes(xod
                     // Center:
                     Ptrf = M * (P + normal*(twidth - dir*width/2));
                     m_centers[roadid][gindex][sindex][*odr_sublane._id].emplace_back(Ptrf.x(), Ptrf.y(), Ptrf.z(), heading);
+                    ++m_totalPointsN;
                 };
                 double twidth = offset;
                 if (odr_section.sub_left)
@@ -287,4 +288,43 @@ multimap<double, XodrBuilder::SValue> XodrBuilder::collectSValues(const t_road &
     }
 
     return svalues;
+}
+
+//////////////////////////////// Python bindings ////////////////////////////////
+
+extern "C" {
+	XodrBuilder * getXodrBuilder(char * xodrname, double resolution)
+    {
+        static XodrBuilder * pxb = new XodrBuilder(xodrname, resolution);
+        return pxb;
+    }
+    size_t getNumberOfPoints(XodrBuilder * xb)
+    {
+        return xb->getNumberOfPoints();
+    }
+    double * getAllPoints(XodrBuilder * xb)
+    {
+        static double * points = new double[xb->getNumberOfPoints()*4];
+        size_t counter = 0;
+        for (auto && r : xb->getCenters()) // roads
+        {
+            for (auto && g : r.second) // geometries
+            {
+                for (auto && s : g.second) // sections
+                {
+                    for (auto && l : s.second) // lanes
+                    {
+                        for (auto && p : l.second) // points
+                        {
+                            points[counter++] = p[0];
+                            points[counter++] = p[1];
+                            points[counter++] = p[2];
+                            points[counter++] = p[3];
+                        }
+                    }
+                }
+            }
+        }
+        return points;
+    }
 }
