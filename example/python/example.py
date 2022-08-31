@@ -1,17 +1,17 @@
 import ctypes
 import os
+import sys
 
 from certifi import contents
 
-if __name__ == "__main__":
+def process(xodrpath):
   # Load the shared library into ctypes
-  libname = os.getcwd() + "/lib/libXodrBuilder.so"
+  libname = os.getcwd() + "/../../lib/libXodrBuilder.so"
   xodrLib = ctypes.cdll.LoadLibrary(libname)
   getXodrFun = xodrLib.getXodrBuilder
   getXodrFun.argtypes = [ctypes.POINTER(ctypes.c_char), ctypes.c_double]
   getXodrFun.restype = ctypes.POINTER(ctypes.c_double)
-  xodrpath = "/home/kbrezhnyev/CARLA_0.9.12/CarlaUE4/Content/Carla/Maps/OpenDrive/Town01.xodr".encode('utf-8')
-  xb = getXodrFun(xodrpath, 1.0)
+  xb = getXodrFun(xodrpath[0].encode('utf-8'), 1.0)
   
   getNofPfun = xodrLib.getNumberOfPoints
   getNofPfun.argtypes = [ctypes.c_void_p]
@@ -24,6 +24,12 @@ if __name__ == "__main__":
   pn = pointsN*4
   getPointsFun.restype = ctypes.POINTER(ctypes.c_double * pn)
   points = getPointsFun(xb)
-  # Attention! May print a lot of stuff here!
-  for i in points.contents: print(i)
+  for p,c in zip(points.contents, range(pn)):
+    print(p)
+    if (c > 16):
+      break
+
+if __name__ == "__main__":
+  xodrpath = sys.argv[1:]
+  process(xodrpath)
   
