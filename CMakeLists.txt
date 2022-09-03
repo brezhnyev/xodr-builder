@@ -24,9 +24,6 @@ add_custom_command(
   TARGET ${PROJECT_NAME} POST_BUILD
   COMMAND rm -rf ${CMAKE_SOURCE_DIR}/lib && mkdir ${CMAKE_SOURCE_DIR}/lib && cp ${CMAKE_BINARY_DIR}/lib${PROJECT_NAME}.so ${CMAKE_SOURCE_DIR}/lib)
 
-
-add_subdirectory(${CMAKE_SOURCE_DIR}/example)
-
 # install commands
 install(TARGETS ${PROJECT_NAME}
         ARCHIVE DESTINATION lib
