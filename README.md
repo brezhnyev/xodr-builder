@@ -14,7 +14,6 @@ To clone and build the project:
 compare with location of existing tinyxml2 (if any):<br>
 ![dpkg L](dpkg_L_tinyxml2.png)<br>
 The tinyxml2 is having known issues with some C functions (sscanf and atof) running on **Del Precision** notebooks. For this reason the tinyxml2.cpp from the root will replace the one in the odrparser/lib/tinyxml2 folder and will be used to build the static library.
-<br>
 1. After the XodrBuilder library is installed into the system you can build and run the provided CPP example. The demo of the c++ client is placed in example/cpp folder. To build the demo do following:
    1. Change current folder with (*cd example/cpp*), create a new folder (ex. *mkdir build*) and change into the directory with *cd build*
    2. run *cmake ..* && make
