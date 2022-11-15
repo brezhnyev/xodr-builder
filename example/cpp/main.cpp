@@ -5,7 +5,7 @@
 
 #include <glut.h>
 
-#include <XodrBuilder/XodrBuilder.h>
+#include "../XodrBuilder.h"
 
 // https://graphics.stanford.edu/courses/cs248-00/helpsession/opengl/code_example.html#callback_display
 
