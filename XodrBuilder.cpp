@@ -111,15 +111,15 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes) : m_XodrRes(xod
                 }
                 else if (odr_subroad.sub_poly3 && odr_subroad._length)
                 {
-                    auto poly3 = odr_subroad.sub_paramPoly3;
+                    auto poly3 = odr_subroad.sub_poly3;
                     P = Eigen::Vector4d(
                         s,
-                        *poly3->_aV + *poly3->_bV * s + *poly3->_cV * s * s + *poly3->_dV * s * s * s,
+                        *poly3->_a + *poly3->_b * s + *poly3->_c * s * s + *poly3->_d * s * s * s,
                         0.0,
                         1.0);
                     // velocity as first derivative of position:
                     velocity.x() = 1;
-                    velocity.y() = *poly3->_bV + *poly3->_cV * 2 * s + *poly3->_dV * 3 * s * s;
+                    velocity.y() = *poly3->_b + *poly3->_c * 2 * s + *poly3->_d * 3 * s * s;
                 }
                 else if (odr_subroad.sub_spiral)
                 {
