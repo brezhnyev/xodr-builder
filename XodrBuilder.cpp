@@ -62,6 +62,11 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes) : m_XodrRes(xod
             // collect all s values for the road
             auto svalues = collectSValues(odr_road);
 
+            // We need to remember the velocity, normal and P for each subroad due to Spiral
+            Eigen::Vector3d velocity(1.0,0.0,0.0);
+            Eigen::Vector4d normal(0.0,1.0,0.0,0.0);
+            Eigen::Vector4d P(0, 0, 0, 1);
+
             for (auto && sv : svalues)
             {
                 auto && odr_subroad = *sv.second.psubroad;
@@ -69,9 +74,13 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes) : m_XodrRes(xod
                 Eigen::Matrix4d M; M.setIdentity();
                 M.block(0,0,3,3) = Eigen::AngleAxisd(*odr_subroad._hdg, Eigen::Vector3d::UnitZ()).toRotationMatrix();
                 M.block(0,3,3,1) = Eigen::Vector3d(*odr_subroad._x, *odr_subroad._y, 0.0);
-                Eigen::Vector3d velocity(1.0,0.0,0.0);
-                Eigen::Vector4d normal(0.0,1.0,0.0,0.0);
-                Eigen::Vector4d P(0, 0, 0, 1);
+                if (sv.first == *odr_subroad._s.get())
+                {
+                    // if a new subroad, update the velocity, normal and P (only due to Spiral geometry specific computation)
+                    velocity = Eigen::Vector3d(1.0,0.0,0.0);
+                    normal = Eigen::Vector4d(0.0,1.0,0.0,0.0);
+                    P = Eigen::Vector4d(0, 0, 0, 1);
+                }
 
                 double S = sv.first;
                 double s = sv.second.gs;
@@ -121,7 +130,7 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes) : m_XodrRes(xod
                     velocity.x() = 1;
                     velocity.y() = *poly3->_b + *poly3->_c * 2 * s + *poly3->_d * 3 * s * s;
                 }
-                else if (odr_subroad.sub_spiral)
+                else if (odr_subroad.sub_spiral && s)
                 {
                     double t = s/(*odr_subroad._length);
                     double curvs = *odr_subroad.sub_spiral->_curvStart;
@@ -245,15 +254,9 @@ multimap<double, XodrBuilder::SValue> XodrBuilder::collectSValues(const t_road &
     addElement(odr_road.sub_lanes->sub_laneSection, svalues_psubsect, [&sindex](void * p, SValue & sv)
         { sv.psection = static_cast<decltype(&odr_road.sub_lanes->sub_laneSection[0])>(p); sv.sindex = sindex; ++sindex;});
     // merge the subroads and sections
-    multimap<double, SValue> svalues = svalues_psubroad;
-    for (auto && sec : svalues_psubsect)
-        svalues.insert(sec);
+    multimap<double, SValue> svalues = move(svalues_psubroad);
+    svalues.insert(svalues_psubsect.begin(), svalues_psubsect.end());
 
-    // now remove the redundant 0 key - there should be only one let:
-    auto range = svalues.equal_range(0); range.second--;
-    range.second->second.psubroad = find_if(range.first, range.second, [](auto it){ return it.second.psubroad; })->second.psubroad;
-    range.second->second.psection = find_if(range.first, range.second, [](auto it){ return it.second.psection; })->second.psection;
-    svalues.erase(range.first, range.second);
     // add the closing s == odr_road.length:  |____||____||____||____|
     svalues.insert({*odr_road._length, SValue()});
     // add the s with the default Res:
@@ -286,6 +289,8 @@ multimap<double, XodrBuilder::SValue> XodrBuilder::collectSValues(const t_road &
         }
         else sv = item.second;
     }
+
+    svalues.erase(svalues.begin()); // remove redundant first [0] element (can be incomplete)
 
     return svalues;
 }
