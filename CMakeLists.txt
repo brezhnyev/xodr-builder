@@ -20,9 +20,10 @@ add_custom_command(
 
 set(HEADER_INCLUDE_FILES XodrBuilder.h)
 
-add_custom_command(
-  TARGET ${PROJECT_NAME} POST_BUILD
-  COMMAND rm -rf ${CMAKE_SOURCE_DIR}/lib && mkdir ${CMAKE_SOURCE_DIR}/lib && cp ${CMAKE_BINARY_DIR}/lib${PROJECT_NAME}.so ${CMAKE_SOURCE_DIR}/lib)
+option(BUILD_EXAMPLES "Build cpp example(s)" OFF)
+if (BUILD_EXAMPLES)
+  add_subdirectory(example)
+endif()
 
 # install commands
 install(TARGETS ${PROJECT_NAME}
