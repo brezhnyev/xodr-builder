@@ -195,7 +195,14 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes) : m_XodrRes(xod
                     {
                         // ONLY 1 center line, actually loop not needed
                         Eigen::Vector4d Ptrf = M * (P + normal*offset);
-                        m_boundaries[roadid][gindex][sindex][*odr_sublane._id].emplace_back(Ptrf.x(), Ptrf.y(), Ptrf.z(), heading);
+                        m_boundaries[roadid][gindex][sindex][*odr_sublane._id].emplace_back(Ptrf.x(), Ptrf.y(), Ptrf.z(), 1.0);
+                        m_boundaries[roadid][gindex][sindex][*odr_sublane._id].lanetype = *odr_sublane._type;
+                        m_boundaries[roadid][gindex][sindex][*odr_sublane._id].back().heading = heading;
+                        if (!odr_sublane.sub_roadMark.empty())
+                        {
+                        auto && roadMark = odr_sublane.sub_roadMark[0]; // KB: can be more!!! Proper implementation: iteration!!!
+                        m_boundaries[roadid][gindex][sindex][*odr_sublane._id].roadmarktype = *roadMark._type;
+                        }
                     }
                 auto buildLane = [&](auto & odr_sublane, int dir, double & twidth)
                 {
@@ -203,10 +210,20 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes) : m_XodrRes(xod
                     double width = polyInter(S - *odr_section._s, odr_sublane.sub_width, [](void * it) ->double { return *static_cast<decltype(&odr_sublane.sub_width[0])>(it)->_sOffset; });
                     twidth += dir*width;
                     Eigen::Vector4d Ptrf = M * (P + normal*twidth);
-                    m_boundaries[roadid][gindex][sindex][*odr_sublane._id].emplace_back(Ptrf.x(), Ptrf.y(), Ptrf.z(), heading);
+                    m_boundaries[roadid][gindex][sindex][*odr_sublane._id].emplace_back(Ptrf.x(), Ptrf.y(), Ptrf.z(), 1.0);
+                    m_boundaries[roadid][gindex][sindex][*odr_sublane._id].lanetype = *odr_sublane._type;
+                    m_boundaries[roadid][gindex][sindex][*odr_sublane._id].back().heading = heading;
+                    if (!odr_sublane.sub_roadMark.empty())
+                    {
+                        auto && roadMark = odr_sublane.sub_roadMark[0]; // KB: can be more!!! Proper implementation: iteration!!!
+                        m_boundaries[roadid][gindex][sindex][*odr_sublane._id].roadmarktype = *roadMark._type;
+                        m_centers[roadid][gindex][sindex][*odr_sublane._id].roadmarktype = *roadMark._type;
+                    }
                     // Center:
                     Ptrf = M * (P + normal*(twidth - dir*width/2));
-                    m_centers[roadid][gindex][sindex][*odr_sublane._id].emplace_back(Ptrf.x(), Ptrf.y(), Ptrf.z(), heading);
+                    m_centers[roadid][gindex][sindex][*odr_sublane._id].emplace_back(Ptrf.x(), Ptrf.y(), Ptrf.z(), 1.0);
+                    m_centers[roadid][gindex][sindex][*odr_sublane._id].lanetype = *odr_sublane._type;
+                    m_centers[roadid][gindex][sindex][*odr_sublane._id].back().heading = heading;
                     ++m_totalPointsN;
                 };
                 double twidth = offset;

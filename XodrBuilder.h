@@ -20,8 +20,13 @@ public:
         double gs{0}; // geometry s
         int sindex{0};
     } SValue;
-
-    typedef std::map<int, std::map<int, std::map<int, std::map<int, std::vector<Eigen::Vector4d>>>>> LanesContainer;
+    class LanePoint : public Eigen::Vector4d
+    {
+        public: LanePoint(double x, double y, double z, double w) : Eigen::Vector4d(x,y,z,w) {}
+        float heading;
+    };
+    class Lane : public std::vector<LanePoint> { public: std::string roadmarktype; std::string lanetype; };
+    typedef std::map<int, std::map<int, std::map<int, std::map<int, Lane>>>> LanesContainer;
 
     XodrBuilder(const std::string & xodrfile, float xodrResolution);
     ~XodrBuilder() = default;
