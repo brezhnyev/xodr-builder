@@ -2,8 +2,10 @@
 #include <libgen.h>
 #include <string>
 #include <unistd.h>
+#include <deque>
 
 #include <glut.h>
+#include <eigen3/Eigen/Eigen>
 
 #include "../../XodrBuilder.h"
 
@@ -24,7 +26,7 @@ XodrBuilder * xodrBuilder;
 
 int main(int argc, char ** argv)
 {
-    string xodrFileName = "Town01.zip";
+    string xodrFileName = "Town05.zip";
     if (access(xodrFileName.c_str(), R_OK))
     {
         cerr << "No file found: " << xodrFileName << ". Quitting loading XODR." << endl;
@@ -41,6 +43,9 @@ int main(int argc, char ** argv)
     xodrFileName = xodrFileName.substr(0, xodrFileName.size()-3) + "xodr";
 
     xodrBuilder = new XodrBuilder(xodrFileName, 1);
+
+    deque<Eigen::Matrix4d> ts = xodrBuilder->getTrafficSigns();
+    cout << "Traffic Signs: " << ts.size() << endl;
 
     // GLUT Window Initialization:
     glutInit (&argc, argv);

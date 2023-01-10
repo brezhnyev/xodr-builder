@@ -223,6 +223,47 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes) : m_XodrRes(xod
                     for (auto && odr_sublane : odr_section.sub_right->sub_lane) sublanes_map[abs<int>(*odr_sublane._id)] = odr_sublane;
                     for (auto && it : sublanes_map) buildLane(it.second, -1, twidth);
                 }
+
+                // SIGNALS PROCESSING:
+                auto processSignal = [&](auto signal)
+                {
+                    // For building the traffic signs (and traffic lights) we use a simple approach:
+                    // we will find the closest object to the current S within the xodrResolution:
+                    if (signal._name->find("Sign_") != string::npos)
+                    {
+                        // traffic signs
+                        if (abs(*signal._s - S) < 0.5 * m_XodrRes)
+                        {
+                            Eigen::Vector4d Ptrf = M * (P - normal * *signal._t);
+                            Eigen::Matrix4d trf; trf.setIdentity();
+                            trf.block(0,0,3,3) = Eigen::AngleAxisd(*signal._hOffset, Eigen::Vector3d::UnitZ()).toRotationMatrix();
+                            trf.block(0,3,4,1) = M * (P - normal * *signal._t);
+                            m_ts.push_back(trf);
+                        }
+                    }
+                    if (signal._name->find("Signal_") != string::npos)
+                    {
+                        // traffic lights
+                    }
+                };
+                // Iterate the signals and references:
+                if (odr_road.sub_signals)
+                {
+                    // signals
+                    for (auto &&signal : odr_road.sub_signals->sub_signal)
+                    {
+                        processSignal(signal);
+                    }
+                    // references: at the moment the references are not working properly
+                    // for (auto && sigref : odr_road.sub_signals->sub_signalReference)
+                    // {
+                    //   auto signal = *trafficSinganls[*sigref._id]; // COPY!
+                    //   *signal._orientation = *sigref._orientation;
+                    //   *signal._s = *sigref._s;
+                    //   *signal._t = *sigref._t;
+                    //   processSignal(signal);
+                    // }
+                }
             }
         }
     }

@@ -6,6 +6,7 @@
 
 #include <string>
 #include <vector>
+#include <deque>
 #include <map>
 
 class XodrBuilder
@@ -24,9 +25,11 @@ public:
 
     XodrBuilder(const std::string & xodrfile, float xodrResolution);
     ~XodrBuilder() = default;
-    const LanesContainer & getBoundaries() { return m_boundaries; } 
-    const LanesContainer & getCenters() { return m_centers; }
-    size_t getNumberOfPoints() { return m_totalPointsN; }
+    const LanesContainer & getBoundaries()                  { return m_boundaries; } 
+    const LanesContainer & getCenters()                     { return m_centers; }
+    size_t getNumberOfPoints()                              { return m_totalPointsN; }
+    const std::deque<Eigen::Matrix4d> getTrafficSigns()     { return m_ts; }
+    const std::deque<Eigen::Matrix4d> getTrafficLights()    { return m_tl; }
 
 private:
     void parseXodr(const std::string & xodrfile);
@@ -37,5 +40,7 @@ private:
     // key1: roadID, key2: roadShapeID, key3: laneSection, key4: laneID. Value: {x,y,z,heading}
     LanesContainer m_boundaries;
     LanesContainer m_centers;
+    std::deque<Eigen::Matrix4d> m_ts; // traffic signs
+    std::deque<Eigen::Matrix4d> m_tl; // traffic lights
     size_t m_totalPointsN{0};
 };
