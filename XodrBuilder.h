@@ -12,13 +12,15 @@
 class XodrBuilder
 {
 public:
-    typedef struct
+    typedef struct SValue
     {
+        SValue(int f=0) : flag(f) {}
         odr_1_5::t_road_planView_geometry * psubroad{nullptr};
         odr_1_5::t_road_lanes_laneSection * psection{nullptr};
         int gindex{0};
         double gs{0}; // geometry s
         int sindex{0};
+        int flag{0}; // -1 starting, 0 intermediate, +1 closing
     } SValue;
     class LanePoint : public Eigen::Vector4d
     {

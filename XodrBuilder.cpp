@@ -74,7 +74,7 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes) : m_XodrRes(xod
                 Eigen::Matrix4d M; M.setIdentity();
                 M.block(0,0,3,3) = Eigen::AngleAxisd(*odr_subroad._hdg, Eigen::Vector3d::UnitZ()).toRotationMatrix();
                 M.block(0,3,3,1) = Eigen::Vector3d(*odr_subroad._x, *odr_subroad._y, 0.0);
-                if (sv.first == *odr_subroad._s.get())
+                if (sv.first == *odr_subroad._s)
                 {
                     // if a new subroad, update the velocity, normal and P (only due to Spiral geometry specific computation)
                     velocity = Eigen::Vector3d(1.0,0.0,0.0);
@@ -98,10 +98,14 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes) : m_XodrRes(xod
                 }
                 else if (odr_subroad.sub_line)
                 {
-                    P = Eigen::Vector4d(s, 0.0, 0.0, 1.0);
-                    // velocity as first derivative of position:
-                    velocity.x() = 1;
-                    velocity.y() = 0;
+                    if (sv.second.flag)
+                    {
+                        P = Eigen::Vector4d(s, 0.0, 0.0, 1.0);
+                        // velocity as first derivative of position:
+                        velocity.x() = 1;
+                        velocity.y() = 0;
+                    }
+                    else continue;
                 }
                 else if (odr_subroad.sub_paramPoly3 && odr_subroad._length)
                 {
@@ -298,10 +302,13 @@ multimap<double, XodrBuilder::SValue> XodrBuilder::collectSValues(const t_road &
     {
         for (auto && val : odr_container)
         {
-            SValue sv;
+            SValue sv(-1);
             f(&val, sv);
             // specific for sub_roads and sections: add the same s for the butt of two consequtive piecces: |____||____||____||
-            if (!svalues.empty()) svalues.insert({*val._s, SValue()});
+            if (!svalues.empty())
+            {
+                svalues.insert({*val._s, SValue(+1)});
+            }
             svalues.insert({*val._s, sv});
         }
     };
@@ -316,7 +323,7 @@ multimap<double, XodrBuilder::SValue> XodrBuilder::collectSValues(const t_road &
     svalues.insert(svalues_psubsect.begin(), svalues_psubsect.end());
 
     // add the closing s == odr_road.length:  |____||____||____||____|
-    svalues.insert({*odr_road._length, SValue()});
+    svalues.insert({*odr_road._length, SValue(+1)});
     // add the s with the default Res:
     for (double s = m_XodrRes; s < *odr_road._length; s += m_XodrRes)
         svalues.insert({s, SValue()});

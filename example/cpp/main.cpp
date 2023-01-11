@@ -26,26 +26,33 @@ XodrBuilder * xodrBuilder;
 
 int main(int argc, char ** argv)
 {
-    string xodrFileName = "Town05.zip";
+    string xodrFileName = "Town01.zip";
+
+    if (argc > 1)
+        xodrFileName = argv[1];
+
     if (access(xodrFileName.c_str(), R_OK))
     {
         cerr << "No file found: " << xodrFileName << ". Quitting loading XODR." << endl;
         return 1;
     }
-    string xodrFileDir = xodrFileName; // need to make copy since dirname corrupts the original string container
-    string command = string(string("unzip -o ") + xodrFileName + " -d " + dirname((char*)(xodrFileDir.c_str())));
-    auto ret = system(command.c_str());
-    if (ret)
+    if (xodrFileName.substr(xodrFileName.length()-3, 3) == "zip")
     {
-        cerr << "Failed unpacking the ZIP file: " << xodrFileName << " with the error code " << ret << endl;
-        return 1;
+        string xodrFileDir = xodrFileName; // need to make copy since dirname corrupts the original string container
+        string command = string(string("unzip -o ") + xodrFileName + " -d " + dirname((char*)(xodrFileDir.c_str())));
+        auto ret = system(command.c_str());
+        if (ret)
+        {
+            cerr << "Failed unpacking the ZIP file: " << xodrFileName << " with the error code " << ret << endl;
+            return 1;
+        }
+        xodrFileName = xodrFileName.substr(0, xodrFileName.size()-3) + "xodr";
     }
-    xodrFileName = xodrFileName.substr(0, xodrFileName.size()-3) + "xodr";
 
     xodrBuilder = new XodrBuilder(xodrFileName, 1);
 
-    deque<Eigen::Matrix4d> ts = xodrBuilder->getTrafficSigns();
-    cout << "Traffic Signs: " << ts.size() << endl;
+    cout << "Points: " << xodrBuilder->getNumberOfPoints() << endl;
+    cout << "Traffic Signs: " << xodrBuilder->getTrafficSigns().size() << endl;
 
     // GLUT Window Initialization:
     glutInit (&argc, argv);
@@ -159,7 +166,7 @@ void display()
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    // Set up viewing transformation, looking down -Z axis
    glLoadIdentity();
-   gluLookAt(200, -100, 300, 200, -100, -1, 0, 1, 0);
+   gluLookAt(0, 0, 300, 0, 0, -1, 0, 1, 0);
    // Render the scene
    RenderObjects();
    // Make sure changes appear onscreen
