@@ -24,6 +24,14 @@ void RenderObjects();
 uint listRoad, listBounadries, listCenterlines;
 XodrBuilder * xodrBuilder;
 
+// for nicer look we will center the xodr by the min/max values of x,y,z:
+float minX = __FLT_MAX__;
+float maxX = -minX;
+float minY = __FLT_MAX__;
+float maxY = -minY;
+float minZ = __FLT_MAX__;
+float maxZ = -minZ;
+
 int main(int argc, char ** argv)
 {
     string xodrFileName = "Town01.zip";
@@ -126,6 +134,12 @@ void InitGraphics(void)
                     for (auto && p : l.second)
                     {
                         glVertex3f(p.x(), p.y(), p.z());
+                        if (minX > p.x()) minX = p.x();
+                        if (maxX < p.x()) maxX = p.x();
+                        if (minY > p.y()) minY = p.y();
+                        if (maxY < p.y()) maxY = p.y();
+                        if (minZ > p.z()) minZ = p.z();
+                        if (maxZ < p.z()) maxZ = p.z();
                     }
                     glEnd();
                 }
@@ -166,8 +180,11 @@ void display()
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    // Set up viewing transformation, looking down -Z axis
    glLoadIdentity();
-   gluLookAt(0, 0, 300, 0, 0, -1, 0, 1, 0);
+   glMatrixMode(GL_PROJECTION);
+   gluLookAt(0, 0, 0.5f*max((maxX-minX), (maxY-minY)), 0, 0, 0, 0, 1, 0);
    // Render the scene
+   glMatrixMode(GL_MODELVIEW);
+   glTranslatef(-0.5f*(minX+maxX), -0.5f*(minY+maxY), -0.5f*(minZ+maxZ));
    RenderObjects();
    // Make sure changes appear onscreen
    glutSwapBuffers();
@@ -178,7 +195,7 @@ void reshape(GLint width, GLint height)
    glViewport(0, 0, width, height);
    glMatrixMode(GL_PROJECTION);
    glLoadIdentity();
-   gluPerspective(65.0, (float)width / height, 1, 1000);
+   gluPerspective(90.0, (float)width / height, 1, 1000);
    glMatrixMode(GL_MODELVIEW);
 }
 
