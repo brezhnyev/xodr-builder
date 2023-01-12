@@ -38,7 +38,7 @@ using namespace Eigen;
 //  lane secion 1 (two lanes)    lane section 2 (one lane)
 
 
-XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes) : m_XodrRes(xodrRes)
+XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes, bool doOptimize) : m_XodrRes(xodrRes)
 {
     OpenDRIVEFile ODR;
     try
@@ -98,7 +98,7 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes) : m_XodrRes(xod
                 }
                 else if (odr_subroad.sub_line)
                 {
-                    if (sv.second.flag)
+                    if (sv.second.flag || !doOptimize)
                     {
                         P = Eigen::Vector4d(s, 0.0, 0.0, 1.0);
                         // velocity as first derivative of position:

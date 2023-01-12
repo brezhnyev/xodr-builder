@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(glut_example)
+project(viz_example)
 add_compile_options(-fPIC)
 
 include_directories("/usr/include/GL")

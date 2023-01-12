@@ -30,7 +30,7 @@ public:
     class Lane : public std::vector<LanePoint> { public: std::string roadmarktype; std::string lanetype; };
     typedef std::map<int, std::map<int, std::map<int, std::map<int, Lane>>>> LanesContainer;
 
-    XodrBuilder(const std::string & xodrfile, float xodrResolution);
+    XodrBuilder(const std::string & xodrfile, float xodrResolution = 1.0f, bool doOptimize = false);
     ~XodrBuilder() = default;
     const LanesContainer & getBoundaries()                  { return m_boundaries; } 
     const LanesContainer & getCenters()                     { return m_centers; }

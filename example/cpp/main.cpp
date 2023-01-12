@@ -35,9 +35,26 @@ float maxZ = -minZ;
 int main(int argc, char ** argv)
 {
     string xodrFileName = "Town01.zip";
+    float resolution = 1.0f;
+    bool doOptimize = false;
+
+    if (argc == 1)
+    {
+        cout << "Usage: " << argv[0] << " path/to/file.xodr resolution doOptimization" << endl;
+        cout << "Example: " << argv[0] << " carla/Maps/Town01.xodr 1 0" << endl;
+        cout << "Example: " << argv[0] << " downloads/Maps/MyTown.zip 0.5 1" << endl;
+        cout << "Optimization flag will force computing only starting and ending point for straight lines of xodr" << endl;
+        cout << "  hence the visualization of the lane's central points (if required) may be affected and need to be extra computed in application" << endl;
+        cout << "---------------------------" << endl;
+        cout << "Starting with default settings (Town01, resolution 1 m, without optimization): Town01.zip 1 0" << endl;
+    }
 
     if (argc > 1)
         xodrFileName = argv[1];
+    if (argc > 2)
+        resolution = atof(argv[2]);
+    if (argc > 2)
+        doOptimize = atoi(argv[3]);
 
     if (access(xodrFileName.c_str(), R_OK))
     {
@@ -57,7 +74,7 @@ int main(int argc, char ** argv)
         xodrFileName = xodrFileName.substr(0, xodrFileName.size()-3) + "xodr";
     }
 
-    xodrBuilder = new XodrBuilder(xodrFileName, 1);
+    xodrBuilder = new XodrBuilder(xodrFileName, resolution, doOptimize);
 
     cout << "Points: " << xodrBuilder->getNumberOfPoints() << endl;
     cout << "Traffic Signs: " << xodrBuilder->getTrafficSigns().size() << endl;
@@ -180,10 +197,9 @@ void display()
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
    // Set up viewing transformation, looking down -Z axis
    glLoadIdentity();
-   glMatrixMode(GL_PROJECTION);
-   gluLookAt(0, 0, 0.5f*max((maxX-minX), (maxY-minY)), 0, 0, 0, 0, 1, 0);
-   // Render the scene
    glMatrixMode(GL_MODELVIEW);
+   gluLookAt(0, 0, 0.5f*(maxY-minY), 0, 0, 0, 0, 1, 0);
+   // Render the scene
    glTranslatef(-0.5f*(minX+maxX), -0.5f*(minY+maxY), -0.5f*(minZ+maxZ));
    RenderObjects();
    // Make sure changes appear onscreen
