@@ -6,7 +6,7 @@ add_compile_options(-fPIC)
 include_directories("/usr/include/GL")
 
 add_executable(${PROJECT_NAME} main.cpp)
-target_link_libraries(${PROJECT_NAME} XodrBuilder -lglut -lGLU -lOpenGL)
+target_link_libraries(${PROJECT_NAME} XodrBuilder -lglut -lGLU -lGL)
 
 add_custom_command(
   TARGET ${PROJECT_NAME} PRE_BUILD
