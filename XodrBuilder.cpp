@@ -154,6 +154,7 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes, bool doOptimize
                     // left normal:
                     normal.x() =-velocity.y();
                     normal.y() = velocity.x();
+                    normal.z() = 0;
                     normal.normalize();
 
                     auto polyInter = [&](double T, auto & polis, double (*getS)(void * itt) ) -> double

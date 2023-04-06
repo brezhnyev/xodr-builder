@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
+set (CMAKE_CXX_STANDARD 14)
+
 project(XodrBuilder VERSION 0.0.1)
 add_compile_options(-fPIC)
 
