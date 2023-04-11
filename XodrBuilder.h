@@ -12,6 +12,13 @@
 class XodrBuilder
 {
 public:
+    struct GeoReference
+    {
+        int lat_0;
+        int lon_0;
+        int x_0;
+        int y_0;
+    };
     typedef struct SValue
     {
         SValue(int f=0) : flag(f) {}
@@ -37,6 +44,7 @@ public:
     size_t getNumberOfPoints()                              { return m_totalPointsN; }
     const std::deque<Eigen::Matrix4d> getTrafficSigns()     { return m_ts; }
     const std::deque<Eigen::Matrix4d> getTrafficLights()    { return m_tl; }
+    GeoReference getGeoReference()                          { return m_geoRef; }
 
 private:
     void parseXodr(const std::string & xodrfile);
@@ -50,4 +58,5 @@ private:
     std::deque<Eigen::Matrix4d> m_ts; // traffic signs
     std::deque<Eigen::Matrix4d> m_tl; // traffic lights
     size_t m_totalPointsN{0};
+    GeoReference m_geoRef;
 };

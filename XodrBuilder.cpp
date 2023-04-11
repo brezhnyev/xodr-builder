@@ -2,6 +2,7 @@
 
 #include <set>
 #include <iostream>
+#include <fstream>
 #include <deque>
 #include <omp.h>
 
@@ -43,8 +44,8 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes, bool doOptimize
     OpenDRIVEFile ODR;
     try
     {
-      loadFile(xodrfile, ODR);
-      /* code */
+        loadFile(xodrfile, ODR);
+        /* code */
 
         for (auto && odr_road : ODR.OpenDRIVE1_5->sub_road)
         {
@@ -289,6 +290,34 @@ signals:
                 }
             }
         }
+        // get geo reference
+        // The geo reference is not implemented in odr parser, so lets parse manually:
+        ifstream ifs(xodrfile);
+        string line;
+        while (getline(ifs, line))
+        {
+            if (line.find("geoReference") != string::npos)
+            {
+                stringstream ss(line);
+                string name;
+                while(getline(ss, name, ' '))
+                {
+                    stringstream ss2(name);
+                    string value;
+                    while(getline(ss2, value, '='));
+                    if (name.find("+lat_0") != string::npos)
+                        m_geoRef.lat_0 = atoi(value.c_str());
+                    else if (name.find("+lon_0") != string::npos)
+                        m_geoRef.lon_0 = atoi(value.c_str());
+                    else if (name.find("+x_0") != string::npos)
+                        m_geoRef.x_0 = atoi(value.c_str());
+                    else if (name.find("+y_0") != string::npos)
+                        m_geoRef.y_0 = atoi(value.c_str());
+                }
+                break;
+            }
+        }
+        ifs.close();
     }
     catch(const std::exception& e)
     {

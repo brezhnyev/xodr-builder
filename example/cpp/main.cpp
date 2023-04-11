@@ -78,6 +78,8 @@ int main(int argc, char ** argv)
 
     cout << "Points: " << xodrBuilder->getNumberOfPoints() << endl;
     cout << "Traffic Signs: " << xodrBuilder->getTrafficSigns().size() << endl;
+    XodrBuilder::GeoReference geoRef = xodrBuilder->getGeoReference();
+    cout << "GeoReference: " << geoRef.lat_0 << " " << geoRef.lon_0 << " " << geoRef.x_0 << " " << geoRef.y_0 << endl;
 
     // GLUT Window Initialization:
     glutInit (&argc, argv);
