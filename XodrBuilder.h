@@ -47,7 +47,7 @@ public:
     GeoReference getGeoReference()                          { return m_geoRef; }
 
 private:
-    void parseXodr(const std::string & xodrfile);
+    std::string checkZip(std::string);
     std::multimap<double, SValue> collectSValues(const odr_1_5::t_road &);
 
 private:

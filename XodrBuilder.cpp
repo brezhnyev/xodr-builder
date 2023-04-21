@@ -5,6 +5,8 @@
 #include <fstream>
 #include <deque>
 #include <omp.h>
+#include <unistd.h>
+#include <libgen.h>
 
 using namespace odr_1_5;
 using namespace odr;
@@ -38,13 +40,37 @@ using namespace Eigen;
 // |------------------------|------------------------------------|
 //  lane secion 1 (two lanes)    lane section 2 (one lane)
 
+string XodrBuilder::checkZip(string xodrFileName)
+{
+    if (access(xodrFileName.c_str(), R_OK))
+    {
+        cerr << "No file found: " << xodrFileName << ". Quitting loading XODR." << endl;
+        throw std::runtime_error("File not found!");
+    }
+    else if (xodrFileName.substr(xodrFileName.length() - 3, 3) == "zip")
+    {
+        string xodrFileDir = xodrFileName; // need to make copy since dirname corrupts the original string container
+        string command = string(string("unzip -o ") + xodrFileName + " -d " + dirname((char *)(xodrFileDir.c_str())));
+        auto ret = system(command.c_str());
+        if (ret)
+        {
+            cerr << "Failed unpacking the ZIP file: " << xodrFileName << " with the error code " << ret << endl;
+            throw std::runtime_error("File could not be unpacked!");
+        }
+        else
+        {
+            xodrFileName = xodrFileName.substr(0, xodrFileName.size() - 3) + "xodr";
+        }
+    }
+    return xodrFileName;
+}
 
 XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes, bool doOptimize) : m_XodrRes(xodrRes)
 {
     OpenDRIVEFile ODR;
     try
     {
-        loadFile(xodrfile, ODR);
+        loadFile(checkZip(xodrfile), ODR);
         /* code */
 
         for (auto && odr_road : ODR.OpenDRIVE1_5->sub_road)
