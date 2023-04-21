@@ -49,6 +49,13 @@ int main(int argc, char ** argv)
         cout << "Starting with default settings (Town01, resolution 1 m, without optimization): Town01.zip 1 0" << endl;
     }
 
+    if (argc > 1)
+        xodrFileName = argv[1];
+    if (argc > 2)
+        resolution = atof(argv[2]);
+    if (argc > 2)
+        doOptimize = atoi(argv[3]);
+
     xodrBuilder = new XodrBuilder(xodrFileName, resolution, doOptimize);
 
     cout << "Points: " << xodrBuilder->getNumberOfPoints() << endl;
