@@ -253,10 +253,10 @@ signals:
                 {
                     // For building the traffic signs (and traffic lights) we use a simple approach:
                     // we will find the closest object to the current S within the xodrResolution:
-                    if (signal._name->find("Sign_") != string::npos)
+                    if (signal._name && signal._name->find("Sign_") != string::npos)
                     {
                         // traffic signs
-                        if (abs(*signal._s - S) < 0.5 * m_XodrRes)
+                        if (signal._s && abs(*signal._s - S) < 0.5 * m_XodrRes)
                         {
                             Eigen::Vector4d Ptrf = M * (P - normal * *signal._t);
                             Eigen::Matrix4d trf; trf.setIdentity();
@@ -265,7 +265,7 @@ signals:
                             m_ts.push_back(trf);
                         }
                     }
-                    if (signal._name->find("Signal_") != string::npos)
+                    if (signal._name && signal._name->find("Signal_") != string::npos)
                     {
                         // traffic lights
                     }
