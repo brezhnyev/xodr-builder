@@ -56,24 +56,6 @@ int main(int argc, char ** argv)
     if (argc > 2)
         doOptimize = atoi(argv[3]);
 
-    if (access(xodrFileName.c_str(), R_OK))
-    {
-        cerr << "No file found: " << xodrFileName << ". Quitting loading XODR." << endl;
-        return 1;
-    }
-    if (xodrFileName.substr(xodrFileName.length()-3, 3) == "zip")
-    {
-        string xodrFileDir = xodrFileName; // need to make copy since dirname corrupts the original string container
-        string command = string(string("unzip -o ") + xodrFileName + " -d " + dirname((char*)(xodrFileDir.c_str())));
-        auto ret = system(command.c_str());
-        if (ret)
-        {
-            cerr << "Failed unpacking the ZIP file: " << xodrFileName << " with the error code " << ret << endl;
-            return 1;
-        }
-        xodrFileName = xodrFileName.substr(0, xodrFileName.size()-3) + "xodr";
-    }
-
     xodrBuilder = new XodrBuilder(xodrFileName, resolution, doOptimize);
 
     cout << "Points: " << xodrBuilder->getNumberOfPoints() << endl;
