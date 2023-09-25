@@ -78,7 +78,7 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes, bool doOptimize
             // Eventually a bug in xodr parser: odr_road._id is string (instead of int)
             int roadid = atoi((*odr_road._id).c_str());
 
-            // skip of no lanes available
+            // skip if no lanes available
             if (!odr_road.sub_lanes)
                 continue;
 
@@ -213,16 +213,17 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes, bool doOptimize
                     Vector3d velocityGlobal = M.block(0,0,3,3) * Vector3d(velocity.x(), velocity.y(), 0);
                     double heading = atan2(velocityGlobal.y(), velocityGlobal.x());
 
-                    uint32_t sindex = sv.second.sindex;
-                    uint32_t gindex = sv.second.gindex;
+                    int sindex = sv.second.sindex;
+                    int gindex = sv.second.gindex;
                     auto && odr_section = *sv.second.psection;
 
                     // set the lanes:
                     double offset = 0.0;
                     if (odr_road.sub_lanes && !odr_road.sub_lanes->sub_laneOffset.empty())
                         offset = polyInter(S, odr_road.sub_lanes->sub_laneOffset, [](void * it) ->double { return *static_cast<decltype(&odr_road.sub_lanes->sub_laneOffset[0])>(it)->_s; });
-                    
+
                     if (odr_section.sub_center)
+                    {
                         for (auto && odr_sublane : odr_section.sub_center->sub_lane)
                         {
                             // ONLY 1 center line, actually loop not needed
@@ -232,10 +233,12 @@ XodrBuilder::XodrBuilder(const string & xodrfile, float xodrRes, bool doOptimize
                             m_boundaries[roadid][gindex][sindex][*odr_sublane._id].back().heading = heading;
                             if (!odr_sublane.sub_roadMark.empty())
                             {
-                            auto && roadMark = odr_sublane.sub_roadMark[0]; // KB: can be more!!! Proper implementation: iteration!!!
-                            m_boundaries[roadid][gindex][sindex][*odr_sublane._id].roadmarktype = *roadMark._type;
+                                auto && roadMark = odr_sublane.sub_roadMark[0]; // KB: can be more!!! Proper implementation: iteration!!!
+                                m_boundaries[roadid][gindex][sindex][*odr_sublane._id].roadmarktype = *roadMark._type;
                             }
+                            ++m_totalPointsN;
                         }
+                    }
                     auto buildLane = [&](auto & odr_sublane, int dir, double & twidth)
                     {
                         // Boundary:
@@ -351,6 +354,14 @@ signals:
     }
 }
 
+
+// Since the s parameter of subroads and subsections is in general case independent
+// the function will pick all specific s for subroads and subsections for later iteration
+// Example
+// subroad's s:                     |______|____|______|________|
+// subsection's s:                  |___|__________|______|_________
+// interval m_XodrRes (ex. 1 m):    |_|_|_|_|_|_|_|_|_|_|_|_|_|_|_|
+// resulting set of s:              |_|_|_|||_|_|_|||_|||_|_|_|_|_|
 
 multimap<double, XodrBuilder::SValue> XodrBuilder::collectSValues(const t_road & odr_road)
 {
