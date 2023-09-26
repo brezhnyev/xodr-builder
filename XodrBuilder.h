@@ -35,9 +35,10 @@ public:
         float heading;
     };
     class Lane : public std::vector<LanePoint> { public: std::string roadmarktype; std::string lanetype; };
+    // key1: roadID, key2: roadShapeID(geometry), key3: laneSection, key4: laneID. Value: Lane<LanePoint>
     typedef std::map<int, std::map<int, std::map<int, std::map<int, Lane>>>> LanesContainer;
 
-    // The doOptimize flag will skip collecting points for lines, except first and last
+    // The doOptimize flag will skip collecting points for straight lines, except first and last
     XodrBuilder(const std::string & xodrfile, float xodrResolution = 1.0f, bool doOptimize = false);
     ~XodrBuilder() = default;
     const LanesContainer & getBoundaries()                  { return m_boundaries; } 
@@ -53,7 +54,6 @@ private:
 
 private:
     const float m_XodrRes{1};
-    // key1: roadID, key2: roadShapeID, key3: laneSection, key4: laneID. Value: {x,y,z,heading}
     LanesContainer m_boundaries;
     LanesContainer m_centers;
     std::deque<Eigen::Matrix4d> m_ts; // traffic signs

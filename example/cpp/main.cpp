@@ -38,13 +38,15 @@ int main(int argc, char ** argv)
     float resolution = 1.0f;
     bool doOptimize = false;
 
-    if (argc == 1)
+    if (argc == 1 || argc > 1 && string(argv[1]).find("help") != string::npos)
     {
         cout << "Usage: " << argv[0] << " path/to/file.xodr resolution doOptimization" << endl;
         cout << "Example: " << argv[0] << " carla/Maps/Town01.xodr 1 0" << endl;
         cout << "Example: " << argv[0] << " downloads/Maps/MyTown.zip 0.5 1" << endl;
         cout << "Optimization flag will force computing only starting and ending point for straight lines of xodr" << endl;
-        cout << "  hence the visualization of the lane's central points (if required) may be affected and need to be extra computed in application" << endl;
+        cout << "  hence the visualization of the lane's central points (if required) may be affected and need to be extra computed in client application" << endl;
+        if (argc > 1 && string(argv[1]).find("help") != string::npos)
+            return 0;
         cout << "---------------------------" << endl;
         cout << "Starting with default settings (Town01, resolution 1 m, without optimization): Town01.zip 1 0" << endl;
     }
@@ -53,7 +55,7 @@ int main(int argc, char ** argv)
         xodrFileName = argv[1];
     if (argc > 2)
         resolution = atof(argv[2]);
-    if (argc > 2)
+    if (argc > 3)
         doOptimize = atoi(argv[3]);
 
     xodrBuilder = new XodrBuilder(xodrFileName, resolution, doOptimize);
